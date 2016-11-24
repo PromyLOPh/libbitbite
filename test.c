@@ -3,9 +3,11 @@
 
 Suite *testBitbuffer ();
 
+#define unused __attribute__((unused))
+
 /*	test suite runner
  */
-int main (int argc, char **argv) {
+int main (int unused argc, char unused **argv) {
 	int numberFailed;
 	SRunner *sr = srunner_create (testBitbuffer ());
 
