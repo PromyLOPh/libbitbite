@@ -1,5 +1,6 @@
 #include <check.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "bitbuffer.h"
 
 bitbuffer bb;
@@ -87,6 +88,25 @@ START_TEST (testBitbufferPushRandom) {
 	}
 } END_TEST
 
+START_TEST (testBitbufferOverflowA) {
+	for (unsigned int i = 0; i < sizeof (buf)/sizeof (*buf); i++) {
+		bool ret = bitbufferPush32 (&bb, 0xaaaaaaaa, 32);
+		ck_assert (ret);
+	}
+	bool ret = bitbufferPush32 (&bb, 0xaaaaaaaa, 32);
+	ck_assert (!ret);
+} END_TEST
+
+START_TEST (testBitbufferOverflowB) {
+	const unsigned int pushsize = 17;
+	for (unsigned int i = 0; i < sizeof (buf)*8/pushsize; i++) {
+		bool ret = bitbufferPush32 (&bb, 0xaaaaaaaa, pushsize);
+		ck_assert (ret);
+	}
+	bool ret = bitbufferPush32 (&bb, 0xaaaaaaaa, pushsize);
+	ck_assert (!ret);
+} END_TEST
+
 Suite *testBitbuffer () {
 	Suite *s = suite_create ("bitbuffer");
 
@@ -104,6 +124,8 @@ Suite *testBitbuffer () {
 	tcase_add_test (tc_core, testBitbufferPushBoundaryA);
 	tcase_add_test (tc_core, testBitbufferPushBoundaryB);
 	tcase_add_test (tc_core, testBitbufferPushBoundaryC);
+	tcase_add_test (tc_core, testBitbufferOverflowA);
+	tcase_add_test (tc_core, testBitbufferOverflowB);
 	suite_add_tcase (s, tc_core);
 
 	return s;

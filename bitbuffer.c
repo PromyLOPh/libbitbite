@@ -7,6 +7,10 @@ bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bi
 	assert (bb != NULL);
 	assert (bits > 0);
 
+	if (bb->totalBits + bits > bb->maxBits) {
+		return false;
+	}
+
 	uint32_t *dataPos = bb->dataPos;
 	const uint32_t * const dataStart = bb->dataStart;
 	const uint32_t dataLen = bb->maxBits/8;
@@ -31,6 +35,8 @@ bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bi
 	bb->totalBits += bits;
 	bb->shiftPos = shiftPos;
 	bb->dataPos = dataPos;
+
+	return true;
 }
 
 void bitbufferInit (bitbuffer * const bb, uint32_t * const buf, const uint32_t maxBits) {
