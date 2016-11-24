@@ -23,8 +23,6 @@ bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bi
 	}
 
 	uint32_t *dataPos = bb->dataPos;
-	const uint32_t * const dataStart = bb->dataStart;
-	const uint32_t dataLen = bb->maxBits/8;
 	const uint32_t dataMasked = maskBits (data, bits);
 	uint8_t shiftPos = bb->shiftPos;
 	uint32_t shift = maskBits (*dataPos, shiftPos);
