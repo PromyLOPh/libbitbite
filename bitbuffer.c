@@ -3,6 +3,10 @@
 #include <stdio.h>
 #include <assert.h>
 
+static uint32_t maskBits (uint32_t data, const uint8_t bits) {
+	return bits == sizeof (data)*8 ? data : data & ((1 << bits)-1);
+}
+
 bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bits) {
 	assert (bb != NULL);
 	assert (bits > 0);
@@ -14,9 +18,9 @@ bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bi
 	uint32_t *dataPos = bb->dataPos;
 	const uint32_t * const dataStart = bb->dataStart;
 	const uint32_t dataLen = bb->maxBits/8;
-	const uint32_t dataMasked = bits == sizeof (data)*8 ? data : data & ((1 << bits)-1);
-	uint32_t shift = *dataPos;
+	const uint32_t dataMasked = maskBits (data, bits);
 	uint8_t shiftPos = bb->shiftPos;
+	uint32_t shift = maskBits (*dataPos, shiftPos);
 
 	shift |= dataMasked << shiftPos;
 	shiftPos += bits;

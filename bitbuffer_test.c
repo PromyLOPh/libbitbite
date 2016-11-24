@@ -4,7 +4,8 @@
 #include "bitbuffer.h"
 
 bitbuffer bb;
-uint32_t buf[10];
+#define ITEMS 10
+uint32_t buf[ITEMS];
 
 static void testSetup () {
 	srandom (0xbd3eb2e8);
@@ -79,12 +80,16 @@ START_TEST (testBitbufferPushBoundaryC) {
 
 START_TEST (testBitbufferPushRandom) {
 	for (unsigned int count = 0; count < 10000; count++) {
-		uint32_t expect[10];
-		for (unsigned int i = 0; i < sizeof (expect)/sizeof (*expect); i++) {
+		bitbufferInit (&bb, buf, sizeof (buf)*8);
+		uint32_t expect[ITEMS];
+		for (unsigned int i = 0; i < ITEMS; i++) {
 			expect[i] = random ();
-			bitbufferPush32 (&bb, expect[i], sizeof (expect[i])*8);
+			bool ret = bitbufferPush32 (&bb, expect[i], 32);
+			ck_assert (ret);
+			ck_assert_uint_eq (buf[i], expect[i]);
+			ck_assert_uint_eq (bitbufferLength (&bb), (i+1)*32);
 		}
-		fail_unless (memcmp (expect, buf, sizeof (expect) == 0));
+		ck_assert_int_eq (memcmp (expect, buf, sizeof (expect)), 0);
 	}
 } END_TEST
 
@@ -107,6 +112,14 @@ START_TEST (testBitbufferOverflowB) {
 	ck_assert (!ret);
 } END_TEST
 
+START_TEST (testBitbufferNonzeroBuf) {
+	memset (buf, 0xff, sizeof (buf));
+	bool ret = bitbufferPush32 (&bb, 0, 32);
+	ck_assert (ret);
+	ck_assert_uint_eq (buf[0], 0);
+	ck_assert_uint_eq (bitbufferLength (&bb), 32);
+} END_TEST
+
 Suite *testBitbuffer () {
 	Suite *s = suite_create ("bitbuffer");
 
@@ -120,12 +133,13 @@ Suite *testBitbuffer () {
 	tcase_add_test (tc_core, testBitbufferPushOneD);
 	tcase_add_test (tc_core, testBitbufferPushOneTrailing);
 	tcase_add_test (tc_core, testBitbufferPushTwo);
-	//tcase_add_test (tc_core, testBitbufferPushRandom);
+	tcase_add_test (tc_core, testBitbufferPushRandom);
 	tcase_add_test (tc_core, testBitbufferPushBoundaryA);
 	tcase_add_test (tc_core, testBitbufferPushBoundaryB);
 	tcase_add_test (tc_core, testBitbufferPushBoundaryC);
 	tcase_add_test (tc_core, testBitbufferOverflowA);
 	tcase_add_test (tc_core, testBitbufferOverflowB);
+	tcase_add_test (tc_core, testBitbufferNonzeroBuf);
 	suite_add_tcase (s, tc_core);
 
 	return s;
