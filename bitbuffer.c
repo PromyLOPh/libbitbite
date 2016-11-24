@@ -1,12 +1,19 @@
+/*	Generic bit buffer, assembling a byte string from individual pushed bits
+ */
+
 #include "bitbuffer.h"
 #include <stdbool.h>
 #include <stdio.h>
 #include <assert.h>
 
+/*	Return only the first bits of data
+ */
 static uint32_t maskBits (uint32_t data, const uint8_t bits) {
 	return bits == sizeof (data)*8 ? data : data & ((1 << bits)-1);
 }
 
+/*	Push at most bits into bitbuffer
+ */
 bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bits) {
 	assert (bb != NULL);
 	assert (bits > 0);
@@ -43,6 +50,9 @@ bool bitbufferPush32 (bitbuffer * const bb, const uint32_t data, const size_t bi
 	return true;
 }
 
+/*	Initialize bitbuffer, assigning buf as backing store of at least maxBits
+ *	length
+ */
 void bitbufferInit (bitbuffer * const bb, uint32_t * const buf, const uint32_t maxBits) {
 	assert (maxBits % 8 == 0);
 
